@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"strconv"
 
 	"github.com/darahayes/go-boom"
 	"github.com/gorilla/mux"
@@ -44,4 +45,30 @@ func GetArticleById(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(article)
 	}
 
+}
+
+func UpdateArticleById(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var article entity.Article
+	// json.Unmarshal(requestBody, &article)
+	err := database.Connector.Save(requestBody).Error
+	if err != nil {
+		boom.BadData(w, err)
+	}
+
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(article)
+	}
+}
+
+func DeletePersonById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	var article entity.Article
+	id, _ := strconv.ParseInt(key, 10, 64)
+	database.Connector.Where("id = ?", id).Delete(&article)
+	w.WriteHeader(http.StatusNoContent)
 }
