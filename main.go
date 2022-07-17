@@ -24,6 +24,8 @@ func server() {
 
 func initializeHandlers(router *mux.Router) {
 	router.HandleFunc("/create", controllers.CreateArticle).Methods("POST")
+	router.HandleFunc("/article/{id}", controllers.GetArticleById).Methods("GET")
+
 }
 
 func initDB() {

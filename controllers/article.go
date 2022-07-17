@@ -8,6 +8,7 @@ import (
 	"rest-go-demo/entity"
 
 	"github.com/darahayes/go-boom"
+	"github.com/gorilla/mux"
 )
 
 func CreateArticle(w http.ResponseWriter, r *http.Request) {
@@ -20,10 +21,27 @@ func CreateArticle(w http.ResponseWriter, r *http.Request) {
 		boom.BadData(w, err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(article)
+	}
 }
 
 func GetArticleById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	var article entity.Article
+	err := database.Connector.First(&article, key).Error
+	if err != nil {
+		boom.NotFound(w, err)
+	}
+
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusFound)
+		json.NewEncoder(w).Encode(article)
+	}
 
 }
